@@ -4,7 +4,7 @@ import json
 from typing import Dict
 
 global infinityVoices
-infinityVoices = Dict[int,InfinityVoice]
+infinityVoices = defaultdict()[int,InfinityVoice]
 
 class InfinityVoice:    
     def __init__(self, guild: Guild, name_format: str, user_limit: int):
@@ -28,7 +28,14 @@ class InfinityVoice:
         
         if found_empty==False:
             if self.active_channels != []:
-                self.active_channels.append(await self.guild.create_voice_channel(self.name_format.format(len(self.active_channels)+1),user_limit=self.user_limit,overwrites=self.active_channels[-1].overwrites ,category=self.active_channels[-1].category,position=self.active_channels[-1].position))
+                number = len(self.active_channels) + 1
+                self.active_channels.append(await self.guild.create_voice_channel(
+                    self.overrides.get(number).name_format.format(number),
+                    user_limit=self.overrides.get(number).user_limit,
+                    overwrites=self.overrides.get(number).overwrites,
+                    category=self.overrides.get(None).category,
+                    position=self.active_channels[-1].position))
+
             else:
                 self.active_channels.append(await self.guild.create_voice_channel(self.name_format.format(len(self.active_channels)+1),user_limit=self.user_limit))
         
