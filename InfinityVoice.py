@@ -6,6 +6,7 @@ from functools import reduce
 
 global infinityVoices
 #guild id to infity voice
+#TODO:is this even type hinting?
 infinityVoices = Dict()[int,InfinityVoice]
 
 class InfinityVoice:    

@@ -13,4 +13,5 @@ class ChannelOverride():
         self.limit = limit
         self.overwrites = overwrites
         self.position = position
+        self.editing = False
 
