@@ -3,6 +3,7 @@ from main import bot
 import json
 from typing import Dict
 from functools import reduce
+from collections import defaultdict
 
 global infinityVoices
 #guild id to infity voice
@@ -59,7 +60,7 @@ async def update_inifity_voices(channel: VoiceChannel):
             if channel == j:
                 await i.update_channels()
 
-def saveInfinity():
+def save_infinities():
     f = open("InfinityVoiceSaves.txt","w+")
     dump=json.dumps(infinityVoices,default=json_encoder)
     print_timed("Saving:"+ dump)

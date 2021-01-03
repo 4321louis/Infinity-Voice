@@ -22,7 +22,7 @@ def json_decoder(str:str) -> dict:
             final[-1].active_channels.append(bot.get_channel(j))
     return final
 
-def get_InfinityVoice(ctx:Context) ->InfinityVoice:
+def get_infinity_voice(ctx:Context) ->InfinityVoice:
     for i in infinityVoices[ctx.guild.id]:
         for j in i:
             if j==ctx.author.voice.channel:
@@ -30,7 +30,8 @@ def get_InfinityVoice(ctx:Context) ->InfinityVoice:
     ctx.send("Please join an Infinity Voice")
     return None
 
-def channelToChannelOverride
+def channel_to_channel_override():
+    pass
 
 #create bot instance
 bot = commands.Bot('!v',commands.HelpCommand())
@@ -52,7 +53,7 @@ async def on_ready():
 @bot.event
 async def on_disconnect():
     print_timed("Disconnected")
-    saveInfinity()
+    save_infinities()
     
 @bot.event
 async def on_voice_state_update(member:Member, before, after):
@@ -98,7 +99,7 @@ async def create(ctx,name_format,user_limit = 0):
 
 @bot.command()
 async def edit(ctx, number = "0"):
-    iv = get_InfinityVoice(ctx)
+    iv = get_infinity_voice(ctx)
     if iv == None: return
     if number == "list":
         await ctx.send(iv.overrides.toString())
@@ -109,21 +110,20 @@ async def edit(ctx, number = "0"):
 
 @bot.command()
 async def save(ctx, number = "0"):
-    iv = get_InfinityVoice(ctx)
+    iv = get_infinity_voice(ctx)
     if iv == None: return
     if number == "all":
         for i in iv.overrides.keys().append(0): 
             iv.overrides[i].editing = False
     if (int(number) in iv.overrides or number == "0"):
         if iv.overrides(int(number)).editing:
-            iv.overrides[int[number]].editing = False
+            iv.overrides[int(number)].editing = False
             if number == "0":
                 ctx.send("Saved default channel")
             else:
                 ctx.send("Saved channel " + str(number))
         else:
             ctx.send("That channel is not currently being edited")
-            return
 
 
 
@@ -140,11 +140,11 @@ async def bleh(ctx):
 
 @bot.command()
 #4321louis' other panic button
-async def saveAll(ctx):
+async def saveall(ctx):
     if ctx.message.author.id == 184599719060832257:
-        saveInfinity()
+        save_infinities()
 
 
 f = open("token.txt","r")
 bot.run(f.read())
-saveInfinity()
+save_infinities()
