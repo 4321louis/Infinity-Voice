@@ -38,8 +38,8 @@ class InfinityVoice:
                 position=self.overrides.get(None).position + len(active_channels) - 1))
         #rename channels
         for i in range(len(self.active_channels)):
-            if self.overrides.get(i).name_format.format(i+1) != self.active_channels[i].name
-                    await self.active_channels[i].edit(name =  self.overrides.get(i).name_format.format(i+1))
+            if self.overrides.get(i).name_format.format(i+1) != self.active_channels[i].name:
+                await self.active_channels[i].edit(name =  self.overrides.get(i).name_format.format(i+1))
 
 
     #updates the references for the channels in the infinity voice 'infinity_voice'
@@ -59,7 +59,6 @@ async def update_inifity_voices(channel: VoiceChannel):
             if channel == j:
                 await i.update_channels()
 
-        
 def saveInfinity():
     f = open("InfinityVoiceSaves.txt","w+")
     dump=json.dumps(infinityVoices,default=json_encoder)

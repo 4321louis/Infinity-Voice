@@ -137,7 +137,7 @@ async def bleh(ctx):
     if ctx.message.author.id == 184599719060832257:
         global infinityVoices
         infinityVoices = {}
-      
+
 @bot.command()
 #4321louis' other panic button
 async def saveAll(ctx):
@@ -145,6 +145,6 @@ async def saveAll(ctx):
         saveInfinity()
 
 
-
-bot.run('NzQwOTg3ODQ3NzU0MTIxMzc5.XyxAtQ.aHNDmsoAWWwzPq6bP_JaXIsaYBg')
+f = open("token.txt","r")
+bot.run(f.read())
 saveInfinity()
