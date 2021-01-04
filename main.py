@@ -1,19 +1,15 @@
 from utils import *
-from InfinityVoice import *
+from InfinityVoice import update_inifity_voices,InfinityVoice,save_infinities
 
 from discord import *
 from discord.ext import commands
 
+import json
 import asyncio
 
 
-def json_encoder(obj: object):
-    if isinstance(obj,Guild) or isinstance(obj,VoiceChannel):
-        return obj.id
-    if isinstance(obj,InfinityVoice):
-        return obj.__dict__
 
-def json_decoder(str:str) -> dict:
+def json_decoder(str:str) -> list:
     loaded = json.loads(str)
     final = []
     for i in loaded:
@@ -22,7 +18,7 @@ def json_decoder(str:str) -> dict:
             final[-1].active_channels.append(bot.get_channel(j))
     return final
 
-def get_infinity_voice(ctx:Context) ->InfinityVoice:
+def get_infinity_voice(ctx:commands.Context) ->InfinityVoice:
     for i in infinityVoices[ctx.guild.id]:
         for j in i:
             if j==ctx.author.voice.channel:

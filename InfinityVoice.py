@@ -1,15 +1,13 @@
 from utils import print_timed,ChannelOverride
-from main import bot
 import json
 from typing import Dict
 from functools import reduce
 from collections import defaultdict
+from discord import Guild,VoiceChannel
 
 global infinityVoices
 #guild id to infity voice
 #TODO:is this even type hinting?
-infinityVoices = Dict()[int,InfinityVoice]
-
 class InfinityVoice:    
     def __init__(self, guild: Guild, name_format: str, user_limit: int):
         self.guild = guild
@@ -44,7 +42,7 @@ class InfinityVoice:
 
 
     #updates the references for the channels in the infinity voice 'infinity_voice'
-    async def reload(self) -> None:
+    async def reload(self,bot) -> None:
         print_timed("Reloading " + self.name_format.format(0))
         for i in range(len(self.active_channels)):
             infinity_voice.active_channels[i] = await bot.fetch_channel(self.active_channels[i].id)    
@@ -52,6 +50,14 @@ class InfinityVoice:
 
 
 
+global infinityVoices
+infinityVoices = dict()#[int,InfinityVoice]
+
+def json_encoder(obj: object):
+    if isinstance(obj,Guild) or isinstance(obj,VoiceChannel):
+        return obj.id
+    if isinstance(obj,InfinityVoice):
+        return obj.__dict__
 
 #updates the infinity voice containing the channel 'channel'
 async def update_inifity_voices(channel: VoiceChannel):
