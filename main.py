@@ -7,7 +7,7 @@ from discord.ext import commands
 import asyncio
 
 
-def json_encoder(obj: Object):
+def json_encoder(obj: object):
     if isinstance(obj,Guild) or isinstance(obj,VoiceChannel):
         return obj.id
     if isinstance(obj,InfinityVoice):
