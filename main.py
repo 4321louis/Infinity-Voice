@@ -1,7 +1,7 @@
 import utils
 from InfinityVoice import InfinityVoice,save_infinities,infinityVoices
 
-from discord import Member
+from discord import Member,VoiceChannel
 import discord.ext.commands as dcec
 
 import json
@@ -18,7 +18,7 @@ def json_decoder(str:str) -> list:
     return final
 
 #TODO:pass xd
-def voice_channel_to_channel_override(channel:VoiceChannel)->ChannelOverride:
+def voice_channel_to_channel_override(channel:VoiceChannel)->utils.ChannelOverride:
     pass
 
 #create bot instance
