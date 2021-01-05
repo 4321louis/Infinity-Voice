@@ -1,13 +1,11 @@
-#TODO fix these imports, good practice pls
-from utils import *
-from InfinityVoice import update_inifity_voices,InfinityVoice,save_infinities
+import utils
+from InfinityVoice import InfinityVoice,save_infinities,infinityVoices
 
-from discord import *
-from discord.ext import commands
+from discord import Member
+import discord.ext.commands as dcec
 
 import json
 import asyncio
-
 
 
 def json_decoder(str:str) -> list:
@@ -19,52 +17,47 @@ def json_decoder(str:str) -> list:
             final[-1].active_channels.append(bot.get_channel(j))
     return final
 
-
-
-def channel_to_channel_override():
+#TODO:pass xd
+def voice_channel_to_channel_override(channel:VoiceChannel)->ChannelOverride:
     pass
 
 #create bot instance
-bot = commands.Bot('!v',commands.HelpCommand())
+bot = dcec.Bot('v!',dcec.HelpCommand())
 
 #################### Events ####################
 
 @bot.event
 async def on_ready():
-    print_timed("")
-    print('Logged in as')
+    utils.print_timed("")
+    print("Logged in as")
     print(bot.user.name)
     print(bot.user.id)
-    print('------')
+    print("------")
 
     global infinityVoices
     f = open("infinityVoiceSaves.txt","r")
     infinityVoices = json_decoder(f.read())
     f.close()
-    
+
 @bot.event
 async def on_disconnect():
-    print_timed("Disconnected")
+    utils.print_timed("Disconnected")
     save_infinities()
-    
+
 @bot.event
 async def on_voice_state_update(member:Member, before, after):
     #update the infinity voice that was affected
     if (before.channel != None):
-        await update_inifity_voices(before.channel)
+        await utils.get_infinity_voice(before.channel).update_channels()
     if (after.channel != None):
-        await update_inifity_voices(after.channel)
+        await utils.get_infinity_voice(after.channel).update_channels()
 
 @bot.event
 async def on_guild_channel_update(before, after):
-    #TODO:fix this logic
+    #TODO:fix this if statements logic
     #when an infinity voice channel is edited (but not by the bot) updates the references for channels in that infinity voice
     if before.name == after.name:
-        for i in infinityVoices[before.guild.id]:
-            for j in i.active_channels:
-                if before.id == j.id:
-                    await i.reload()
-                    return
+        await utils.get_infinity(before).reload()
 
 @bot.event
 async def on_guild_join(guild):
@@ -82,6 +75,7 @@ async def on_guild_remove(guild):
 #     pass
 
 #TODO:think about what name_format is for the end user
+##i.e. "Gaming {}" where {} is the number? how about special chars instead? which?
 @bot.command()
 async def create(ctx,name_format,user_limit = 0):
     if ctx.message.author.guild_permissions.administrator:
@@ -91,21 +85,25 @@ async def create(ctx,name_format,user_limit = 0):
 
 @bot.command()
 async def edit(ctx, number = "0"):
-    iv = get_infinity_voice(ctx)
-    if iv == None: return
+    iv = utils.get_infinity_voice(ctx.author.voice.channel)
+    if iv == None: 
+        ctx.send("Please join an Infinity Voice")
+        return
     if number == "list":
         await ctx.send(iv.overrides.toString())
     elif number.isnumeric():
-        if (int(number) in iv.overrides or number =="0"):
-            iv[int(number)].editing = True
-
+        if not (int(number) in iv.overrides or number == "0"):
+            iv.overrides[int(number)] = utils.ChannelOverride()
+        iv.overrides[int(number)].editing = True
 
 @bot.command()
 async def save(ctx, number = "0"):
-    iv = get_infinity_voice(ctx)
-    if iv == None: return
+    iv = utils.get_infinity_voice(ctx.author.voice.channel)
+    if iv == None: 
+        ctx.send("Please join an Infinity Voice")
+        return
     if number == "all":
-        for i in iv.overrides.keys().append(0): 
+        for i in iv.overrides.keys().append("0"): 
             iv.overrides[i].editing = False
     if (int(number) in iv.overrides or number == "0"):
         if iv.overrides(int(number)).editing:
@@ -116,8 +114,6 @@ async def save(ctx, number = "0"):
                 ctx.send("Saved channel " + str(number))
         else:
             ctx.send("That channel is not currently being edited")
-
-
 
 
 

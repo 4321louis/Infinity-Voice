@@ -1,4 +1,4 @@
-from utils import print_timed,ChannelOverride,get_infinity_voice
+from utils import print_timed,ChannelOverride
 import json
 from typing import Dict
 from functools import reduce
@@ -6,10 +6,13 @@ from collections import defaultdict
 from discord import Guild,VoiceChannel
 
 class InfinityVoice:    
-    def __init__(self, guild: Guild, name_format: str, user_limit: int):
+    def __init__(self, guild: Guild, name_format: str, user_limit: int = -1):
         self.guild = guild
         self.active_channels = []
-        self.overrides = defaultdict()[int,ChannelOverride]
+        default  = ChannelOverride()
+        default.name_format = name_format
+        defualt.user_limit = user_limit
+        self.overrides = defaultdict(default)#[int,ChannelOverride]
 
     # called to update the infinity voice 
     async def update_channels(self):
@@ -59,13 +62,13 @@ def json_encoder(obj: object):
     if isinstance(obj,InfinityVoice):
         return obj.__dict__
 
-# updates the infinity voice containing the channel 'channel'
-#TODO use get_infinity_voice
-async def update_inifity_voices(channel: VoiceChannel):
+def get_infinity_voice(channel:VoiceChannel) -> InfinityVoice:
+    global infinityVoices
     for infinity_voice in infinityVoices[channel.guild.id]:
         for active_channel in infinity_voice.active_channels:
             if channel == active_channel:
-                await infinity_voice.update_channels()
+                return infinity_voice
+    return None
 
 def save_infinities():
     f = open("InfinityVoiceSaves.txt","w+")
