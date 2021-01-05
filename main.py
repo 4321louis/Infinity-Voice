@@ -1,3 +1,4 @@
+#TODO fix these imports, good practice pls
 from utils import *
 from InfinityVoice import update_inifity_voices,InfinityVoice,save_infinities
 
@@ -18,13 +19,7 @@ def json_decoder(str:str) -> list:
             final[-1].active_channels.append(bot.get_channel(j))
     return final
 
-def get_infinity_voice(ctx:commands.Context) ->InfinityVoice:
-    for i in infinityVoices[ctx.guild.id]:
-        for j in i:
-            if j==ctx.author.voice.channel:
-                return i
-    ctx.send("Please join an Infinity Voice")
-    return None
+
 
 def channel_to_channel_override():
     pass
@@ -41,6 +36,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------')
+
     global infinityVoices
     f = open("infinityVoiceSaves.txt","r")
     infinityVoices = json_decoder(f.read())
