@@ -9,11 +9,11 @@ class InfinityVoice:
     def __init__(self, guild: Guild, name_format: str, user_limit: int = -1):
         self.guild = guild
         self.active_channels = []
-        default  = ChannelOverride()
+        default = ChannelOverride()
         default.name_format = name_format
-        defualt.user_limit = user_limit
-        self.overrides = defaultdict(default)#[int,ChannelOverride]
-
+        default.user_limit = user_limit
+        self.overrides = defaultdict(lambda:default)#[int,ChannelOverride]
+    
     # called to update the infinity voice 
     async def update_channels(self):
         # delete excess channels
@@ -32,16 +32,16 @@ class InfinityVoice:
         if found_empty == False:
             number:int = len(self.active_channels)
             self.active_channels.append(await self.guild.create_voice_channel(
-                self.overrides.get(number).name_format.format(number + 1),
-                user_limit = self.overrides.get(number).user_limit,
-                overwrites = self.overrides.get(number).overwrites,
-                category   = self.overrides.get(None).category,
-                position   = self.overrides.get(None).position + len(active_channels) - 1))
-
+                self.overrides[number].name_format.format(number + 1),
+                user_limit = self.overrides[number].user_limit,
+                overwrites = self.overrides[number].overwrites,
+                category   = self.overrides[None].category,
+                position   = self.overrides[None].position + len(self.active_channels) - 1))
+    
         # rename channels
         for i in range(len(self.active_channels)):
-            if self.overrides.get(i).name_format.format(i+1) != self.active_channels[i].name:
-                await self.active_channels[i].edit(name =  self.overrides.get(i).name_format.format(i+1))
+            if self.overrides[i].name_format.format(i+1) != self.active_channels[i].name:
+                await self.active_channels[i].edit(name =  self.overrides[i].name_format.format(i+1))
 
 
     # updates the references for the channels in the infinity voice 'infinity_voice'
@@ -53,7 +53,6 @@ class InfinityVoice:
 
 # guild id to infinity voice
 #TODO:is this even type hinting?
-global infinityVoices
 infinityVoices = dict()#[int,InfinityVoice]
 
 def json_encoder(obj: object):
@@ -63,7 +62,6 @@ def json_encoder(obj: object):
         return obj.__dict__
 
 def get_infinity_voice(channel:VoiceChannel) -> InfinityVoice:
-    global infinityVoices
     for infinity_voice in infinityVoices[channel.guild.id]:
         for active_channel in infinity_voice.active_channels:
             if channel == active_channel:

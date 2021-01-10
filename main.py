@@ -1,12 +1,14 @@
 import utils
-from InfinityVoice import InfinityVoice,save_infinities,infinityVoices
-
+from InfinityVoice import InfinityVoice,save_infinities,get_infinity_voice
 from discord import Member,VoiceChannel
 import discord.ext.commands as dcec
 
 import json
 import asyncio
+from collections import defaultdict
 
+# ONLY USE THIS TO GET THE 'infinityVoices' "global" variable
+import InfinityVoice as IV
 
 def json_decoder(str:str) -> list:
     loaded = json.loads(str)
@@ -34,9 +36,9 @@ async def on_ready():
     print(bot.user.id)
     print("------")
 
-    global infinityVoices
     f = open("infinityVoiceSaves.txt","r")
-    infinityVoices = json_decoder(f.read())
+    IV.infinityVoices = json_decoder(f.read())
+    print(IV.infinityVoices)
     f.close()
 
 @bot.event
@@ -48,24 +50,24 @@ async def on_disconnect():
 async def on_voice_state_update(member:Member, before, after):
     #update the infinity voice that was affected
     if (before.channel != None):
-        await utils.get_infinity_voice(before.channel).update_channels()
+        await get_infinity_voice(before.channel).update_channels()
     if (after.channel != None):
-        await utils.get_infinity_voice(after.channel).update_channels()
+        await get_infinity_voice(after.channel).update_channels()
 
 @bot.event
 async def on_guild_channel_update(before, after):
     #TODO:fix this if statements logic
     #when an infinity voice channel is edited (but not by the bot) updates the references for channels in that infinity voice
     if before.name == after.name:
-        await utils.get_infinity(before).reload()
+        await get_infinity_voice(before).reload()
 
 @bot.event
 async def on_guild_join(guild):
-    infinityVoices[guild.id] = []
+    IV.infinityVoices[guild.id] = []
 
 @bot.event
 async def on_guild_remove(guild):
-    infinityVoices.pop(guild.id)
+    IV.infinityVoices.pop(guild.id)
 
 #################### Commands ####################
 
@@ -80,12 +82,12 @@ async def on_guild_remove(guild):
 async def create(ctx,name_format,user_limit = 0):
     if ctx.message.author.guild_permissions.administrator:
         new = InfinityVoice(ctx.guild,name_format,int(user_limit))
-        infinityVoices[ctx.guild.id].append(new)
+        IV.infinityVoices[ctx.guild.id].append(new)
         await new.update_channels()
 
 @bot.command()
 async def edit(ctx, number = "0"):
-    iv = utils.get_infinity_voice(ctx.author.voice.channel)
+    iv = get_infinity_voice(ctx.author.voice.channel)
     if iv == None: 
         ctx.send("Please join an Infinity Voice")
         return
@@ -98,7 +100,7 @@ async def edit(ctx, number = "0"):
 
 @bot.command()
 async def save(ctx, number = "0"):
-    iv = utils.get_infinity_voice(ctx.author.voice.channel)
+    iv = get_infinity_voice(ctx.author.voice.channel)
     if iv == None: 
         ctx.send("Please join an Infinity Voice")
         return
@@ -123,8 +125,7 @@ async def save(ctx, number = "0"):
 #4321louis' panic button
 async def bleh(ctx):
     if ctx.message.author.id == 184599719060832257:
-        global infinityVoices
-        infinityVoices = {}
+        IV.infinityVoices = {}
 
 @bot.command()
 #4321louis' other panic button
