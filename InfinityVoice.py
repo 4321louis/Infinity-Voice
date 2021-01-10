@@ -58,7 +58,7 @@ infinityVoices = dict()#[int,InfinityVoice]
 def json_encoder(obj: object):
     if isinstance(obj,Guild) or isinstance(obj,VoiceChannel):
         return obj.id
-    if isinstance(obj,InfinityVoice):
+    if isinstance(obj,InfinityVoice) or isinstance(obj,ChannelOverride):
         return obj.__dict__
 
 def get_infinity_voice(channel:VoiceChannel) -> InfinityVoice:

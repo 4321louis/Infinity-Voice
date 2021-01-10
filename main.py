@@ -10,13 +10,37 @@ from collections import defaultdict
 # ONLY USE THIS TO GET THE 'infinityVoices' "global" variable
 import InfinityVoice as IV
 
-def json_decoder(str:str) -> list:
+def json_decoder(str:str) -> dict:
     loaded = json.loads(str)
-    final = []
-    for i in loaded:
-        final.append(InfinityVoice(bot.get_guild(i["guild"]),i["name_format"],i["user_limit"]))
-        for j in i["channels"]:
-            final[-1].active_channels.append(bot.get_channel(j))
+    final = {}
+    for str_guild_id,infinity_voice_ids in loaded.items():
+        guild_id = int(str_guild_id)
+        final[guild_id] = []
+        for infinity_voice_dict in infinity_voice_ids:
+            final[guild_id].append(InfinityVoice(bot.get_guild(infinity_voice_dict["guild"]),infinity_voice_dict["name_format"],infinity_voice_dict["user_limit"]))
+            for channel_id in infinity_voice_dict["active_channels"]:
+                final[guild_id][-1].active_channels.append(bot.get_channel(channel_id))
+            default_dict = infinity_voice_dict["overrides"]["null"]
+            # TODO:kwargs please probs
+            default = utils.ChannelOverride()
+            default.name_format = default_dict["name_format"]
+            default.limit = default_dict["limit"]
+            default.overwrites = default_dict["overwrites"]
+            default.category = bot.fetch_channel(default_dict["category"])
+            default.position = default_dict["position"]
+            final[guild_id][-1].overrides = defaultdict(default)
+            for number in infinity_voice_dict["overrides"]:
+                if number == "null":continue
+                override_dict = infinity_voice_dict["overrides"][number]
+                # TODO:kwargs please probs
+                override = utils.ChannelOverride()
+                override.name_format = override_dict["name_format"]
+                override.limit = override_dict["limit"]
+                override.overwrites = override_dict["overwrites"]
+                override.category = bot.fetch_channel(override_dict["category"])
+                override.position = override_dict["position"]
+                final[guild_id][-1].overrides[int(number)] = override
+
     return final
 
 #TODO:pass xd
