@@ -1,6 +1,6 @@
 import utils
 from InfinityVoice import InfinityVoice,save_infinities,get_infinity_voice
-from discord import Member,VoiceChannel
+from discord import Member,VoiceChannel, Embed
 import discord.ext.commands as dcec
 
 import json
@@ -95,10 +95,42 @@ async def on_guild_remove(guild):
 
 #################### Commands ####################
 
-#TODO:HELP? look into the help command in the library
-# @bot.command()
-# async def help(ctx,command)
-#     pass
+### HELP COMMANDS
+
+bot.remove_command("help")
+
+@bot.group(invoke_without_command=True)
+async def help(ctx):
+    help_embed = Embed(title = "Help", description = "Use v!help <command> for extended instructions")
+
+    help_embed.add_field(name = "InfinityVoice Tools", value = "create,edit,save")
+
+    await ctx.send(embed = help_embed)
+
+@help.command()
+async def create(ctx):
+    create_embed = Embed(title = "Create", description = "Creates an InfinityVoice")
+    
+    create_embed.add_field(name = "**Syntax**", value="v!create <name_format> [user_limit]")
+
+    await ctx.send(embed = create_embed)
+
+@help.command()
+async def edit(ctx):
+    edit_embed = Embed(title = "Edit", description = "Edit an InfinityVoice channel")
+    
+    edit_embed.add_field(name = "**Syntax**", value="v!edit <channel_number>")
+
+    await ctx.send(embed = edit_embed)
+
+@help.command()
+async def save(ctx):
+    save_embed = Embed(title = "Save", description = "Save an InfinityVoice channel")
+    
+    save_embed.add_field(name = "**Syntax**", value="v!save <channel_number>")
+
+    await ctx.send(embed = save_embed)
+
 
 #TODO:think about what name_format is for the end user
 ##i.e. "Gaming {}" where {} is the number? how about special chars instead? which?
