@@ -7,20 +7,21 @@ import bot
 from collections import defaultdict
 import json
 
-import InfinityVoice
+# imports the class
+from InfinityVoice import InfinityVoice
 
 class InfinityVoiceTools(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.infinityVoices = None
+        # {server: [infinityvoices]}
+        self.infinityVoices = {}
 
     # Events
     @commands.Cog.listener()
     async def on_ready(self):
         utils.print_timed("")
         print("Logged in as")
-        print(self.bot.user.name)
-        print(self.bot.user.id)
+        print(self.bot.user.name, "id:", self.bot.user.id)
         print("------")
         f = open("infinityVoiceSaves.txt", "r")
         self.infinityVoices = self.json_decoder(f.read())
@@ -29,15 +30,37 @@ class InfinityVoiceTools(commands.Cog):
     @commands.Cog.listener()
     async def on_disconnect(self):
         utils.print_timed("Disconnected")
-        InfinityVoice.save_infinities()
+        save_infinities(self)
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member:discord.Member, before, after):
     #update the infinity voice that was affected
+
+    # get infinityvoice from given channel, then update infinityvoice
+
         if (before.channel != None):
-            await InfinityVoice.get_infinity_voice(before.channel).update_channels()
+            # looping through infinityvoices in server
+            (await get_infinity_voice(self, before.channel)).update_channels()
+            
+            # for infinityvoice in self.infinityVoices[before.channel.guild_id]:
+            #     for active_channel in infinityvoice.active_channels:
+            #         if before.channel == active_channel:
+            #             await infinityvoice.update_channels()
+
         if (after.channel != None):
-            await InfinityVoice.get_infinity_voice(after.channel).update_channels()
+            # looping through infinityvoices in server
+
+            (await get_infinity_voice(self, after.channel)).update_channels()
+            # for infinityvoice in self.infinityVoices[before.channel.guild_id]:
+            #     for active_channel in infinityvoice.active_channels:
+            #         if before.channel == active_channel:
+            #             await infinityvoice.update_channels()
+
+
+
+            # await InfinityVoice.get_infinity_voice(before.channel).update_channels()
+        
+            # await InfinityVoice.get_infinity_voice(after.channel).update_channels()
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
@@ -55,13 +78,19 @@ class InfinityVoiceTools(commands.Cog):
         self.infinityVoices.pop(guild.id)
 
     # Commands
-
     @commands.command()
     async def create(self, ctx, name_format, user_limit=0):
-        if ctx.message.author.guild_permissions.administrator:
-            print("created an infinity voice")
+        #TODO if ctx.message.author.guild_permissions.administrator:
+        if True:
+            print("Name format:", name_format)
+            print("User limit:", user_limit)
             new = InfinityVoice(ctx.guild,name_format,int(user_limit))
-            self.infinityVoices[ctx.guild.id].append(new)
+            
+            if (not self.infinityVoices):
+                (await self.infinityVoices)[ctx.guild.id].append(new)
+            else:
+                (await self.infinityVoices)[ctx.guild.id] = [new]
+            print("created an infinity voice")
             await new.update_channels()
 
     @commands.command()
@@ -141,7 +170,26 @@ class InfinityVoiceTools(commands.Cog):
 
         return final
 
+async def get_infinity_voice(infinityvoicetool:InfinityVoiceTools, channel:discord.VoiceChannel) -> InfinityVoice:
+    for infinity_voice in (await infinityvoicetool.infinityVoices)[channel.guild.id]:
+        for active_channel in infinity_voice.active_channels:
+            if channel == active_channel:
+                return infinity_voice
+    return None
 
+def save_infinities(infinityvoicetool:InfinityVoiceTools):
+    # save as dict{guild.id: [infinityvoices]}
+    f = open("InfinityVoiceSaves.txt","w+")
+    dump=json.dumps(infinityvoicetool.infinityVoices,default=json_encoder)
+    utils.print_timed("Saving:"+ dump)
+    f.write(dump)
+    f.close()
+
+def json_encoder(obj: object):
+    if isinstance(obj,discord.Guild) or isinstance(obj,discord.VoiceChannel):
+        return obj.id
+    if isinstance(obj,InfinityVoice) or isinstance(obj,utils.ChannelOverride):
+        return obj.__dict__
 
 
 def setup(bot):
