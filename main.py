@@ -1,4 +1,4 @@
-import utils
+from utils import ChannelOverride, print_timed
 from InfinityVoice import InfinityVoice,save_infinities,get_infinity_voice
 from discord import Member,VoiceChannel, Embed
 import discord.ext.commands as dcec
@@ -10,7 +10,7 @@ from collections import defaultdict
 # ONLY USE THIS TO GET THE 'infinityVoices' "global" variable
 import InfinityVoice as IV
 
-def json_decoder(str:str) -> dict:
+def json_decoder(str: str) -> dict:
     loaded = json.loads(str)
     final = {}
     for str_guild_id,infinity_voice_ids in loaded.items():
@@ -22,7 +22,7 @@ def json_decoder(str:str) -> dict:
                 final[guild_id][-1].active_channels.append(bot.get_channel(channel_id))
             default_dict = infinity_voice_dict["overrides"]["null"]
             # TODO:kwargs please probs
-            default = utils.ChannelOverride()
+            default = ChannelOverride()
             default.name_format = default_dict["name_format"]
             default.limit = default_dict["limit"]
             default.overwrites = default_dict["overwrites"]
@@ -33,7 +33,7 @@ def json_decoder(str:str) -> dict:
                 if number == "null":continue
                 override_dict = infinity_voice_dict["overrides"][number]
                 # TODO:kwargs please probs
-                override = utils.ChannelOverride()
+                override = ChannelOverride()
                 override.name_format = override_dict["name_format"]
                 override.limit = override_dict["limit"]
                 override.overwrites = override_dict["overwrites"]
@@ -44,7 +44,7 @@ def json_decoder(str:str) -> dict:
     return final
 
 #TODO:pass xd
-def voice_channel_to_channel_override(channel:VoiceChannel)->utils.ChannelOverride:
+def voice_channel_to_channel_override(channel: VoiceChannel) -> ChannelOverride:
     pass
 
 #create bot instance
@@ -54,7 +54,7 @@ bot = dcec.Bot('v!',dcec.HelpCommand())
 
 @bot.event
 async def on_ready():
-    utils.print_timed("")
+    print_timed("")
     print("Logged in as")
     print(bot.user.name)
     print(bot.user.id)
@@ -67,11 +67,11 @@ async def on_ready():
 
 @bot.event
 async def on_disconnect():
-    utils.print_timed("Disconnected")
+    print_timed("Disconnected")
     save_infinities()
 
 @bot.event
-async def on_voice_state_update(member:Member, before, after):
+async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState) -> None:
     #update the infinity voice that was affected
     if (before.channel != None):
         await get_infinity_voice(before.channel).update_channels()
@@ -79,11 +79,11 @@ async def on_voice_state_update(member:Member, before, after):
         await get_infinity_voice(after.channel).update_channels()
 
 @bot.event
-async def on_guild_channel_update(before, after):
+async def on_guild_channel_update(before: GuildChannel, after: GuildChannel):
     #TODO:fix this if statements logic
     #when an infinity voice channel is edited (but not by the bot) updates the references for channels in that infinity voice
     if before.name == after.name:
-        await get_infinity_voice(before).reload()
+        await get_infinity_voice(before).reload(bot)
 
 @bot.event
 async def on_guild_join(guild):
@@ -151,7 +151,7 @@ async def edit(ctx, number = "0"):
         await ctx.send(iv.overrides.toString())
     elif number.isnumeric():
         if not (int(number) in iv.overrides or number == "0"):
-            iv.overrides[int(number)] = utils.ChannelOverride()
+            iv.overrides[int(number)] = ChannelOverride()
         iv.overrides[int(number)].editing = True
 
 @bot.command()

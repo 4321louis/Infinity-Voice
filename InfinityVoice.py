@@ -1,21 +1,22 @@
 from utils import print_timed,ChannelOverride
 import json
-from typing import Dict
-from functools import reduce
+from typing import Dict,Union
 from collections import defaultdict
 from discord import Guild,VoiceChannel
 
 class InfinityVoice:    
-    def __init__(self, guild: Guild, name_format: str, user_limit: int = -1):
+    def __init__(self: InfinityVoice, guild: Guild, name_format: str, user_limit: int = -1):
         self.guild = guild
         self.active_channels = []
+        # every channel that gets created in this infinityvoice will by default have the following
         default = ChannelOverride()
         default.name_format = name_format
         default.user_limit = user_limit
-        self.overrides = defaultdict(lambda:default)#[int,ChannelOverride]
+        # dictionary that stores all the potential overrides in: {channelNumber: ChannelOverride}
+        self.overrides = defaultdict(lambda:default)
     
     # called to update the infinity voice 
-    async def update_channels(self):
+    async def update_channels(self: InfinityVoice) -> None:
         # delete excess channels
         found_empty= False
         i=0
@@ -30,7 +31,7 @@ class InfinityVoice:
 
         # no empty channels found, create empty channel
         if found_empty == False:
-            number:int = len(self.active_channels)
+            number = len(self.active_channels)
             self.active_channels.append(await self.guild.create_voice_channel(
                 self.overrides[number].name_format.format(number + 1),
                 user_limit = self.overrides[number].user_limit,
@@ -45,30 +46,33 @@ class InfinityVoice:
 
 
     # updates the references for the channels in the infinity voice 'infinity_voice'
-    async def reload(self,bot) -> None:
+    async def reload(self: InfinityVoice, bot: Bot) -> None:
         print_timed("Reloading " + self.name_format.format(0))
         for i in range(len(self.active_channels)):
             infinity_voice.active_channels[i] = await bot.fetch_channel(self.active_channels[i].id)    
         print_timed("Reload Finished " + self.name_format)
 
-# guild id to infinity voice
 #TODO:is this even type hinting?
-infinityVoices = dict()#[int,InfinityVoice]
+# {guildID: InfinityVoice}
+infinityVoices = dict()
 
-def json_encoder(obj: object):
+def json_encoder(obj: object) -> Union[int, dict]:
+    # encode guilds and voice channels as their id
     if isinstance(obj,Guild) or isinstance(obj,VoiceChannel):
         return obj.id
+    # encode InfinityVoice or ChannelOverride's symbol table
     if isinstance(obj,InfinityVoice) or isinstance(obj,ChannelOverride):
         return obj.__dict__
 
-def get_infinity_voice(channel:VoiceChannel) -> InfinityVoice:
+# Returns the infinityvoice the given channel is in
+def get_infinity_voice(channel: VoiceChannel) -> Union[InfinityVoice, None]:
     for infinity_voice in infinityVoices[channel.guild.id]:
         for active_channel in infinity_voice.active_channels:
             if channel == active_channel:
                 return infinity_voice
     return None
 
-def save_infinities():
+def save_infinities() -> None:
     f = open("InfinityVoiceSaves.txt","w+")
     dump=json.dumps(infinityVoices,default=json_encoder)
     print_timed("Saving:"+ dump)
