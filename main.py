@@ -74,16 +74,16 @@ async def on_disconnect():
 async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState) -> None:
     #update the infinity voice that was affected
     if (before.channel != None):
-        await get_infinity_voice(before.channel).update_channels()
+        await get_infinity_voice(before.channel).on_size_change()
     if (after.channel != None):
-        await get_infinity_voice(after.channel).update_channels()
+        await get_infinity_voice(after.channel).on_size_change()
 
 @bot.event
 async def on_guild_channel_update(before: GuildChannel, after: GuildChannel):
     #TODO:fix this if statements logic
     #when an infinity voice channel is edited (but not by the bot) updates the references for channels in that infinity voice
     if before.name == after.name:
-        await get_infinity_voice(before).reload(bot)
+        await get_infinity_voice(before).reload_references()
 
 @bot.event
 async def on_guild_join(guild):
@@ -139,7 +139,7 @@ async def create(ctx,name_format,user_limit = 0):
     if ctx.message.author.guild_permissions.administrator:
         new = InfinityVoice(ctx.guild,name_format,int(user_limit))
         IV.infinityVoices[ctx.guild.id].append(new)
-        await new.update_channels()
+        await new.on_size_change()
 
 @bot.command()
 async def edit(ctx, number = "0"):
@@ -161,7 +161,8 @@ async def save(ctx, number = "0"):
         ctx.send("Please join an Infinity Voice")
         return
     if number == "all":
-        for i in iv.overrides.keys().append("0"): 
+        for i in iv.overrides.keys().append("0"):
+            # voice_channel_to_channel_override(iv.active_channels) 
             iv.overrides[i].editing = False
     if (int(number) in iv.overrides or number == "0"):
         if iv.overrides(int(number)).editing:
