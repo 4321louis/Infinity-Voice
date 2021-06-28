@@ -25,7 +25,7 @@ class InfinityVoice:
         self.overrides = defaultdict(lambda:default)#[int,ChannelOverride]
     
     # called to update the infinity voice 
-    async def update_channels(self):
+    async def on_size_change(self):
         # delete excess channels
         found_empty:bool = False
         i:int=0
@@ -60,7 +60,7 @@ class InfinityVoice:
 
 
     # updates the references for the channels in the infinity voice 'infinity_voice'
-    async def reload(self,bot) -> None:
+    async def reload_references(self,bot) -> None:
         print_timed("Reloading " + self.name_format.format(0))
         for i in range(len(self.active_channels)):
             infinity_voice.active_channels[i] = await bot.fetch_channel(self.active_channels[i].id)    

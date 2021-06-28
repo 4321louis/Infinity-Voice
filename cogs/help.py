@@ -9,6 +9,7 @@ class Help(commands.Cog):
     @commands.command()
     async def send_help(self, ctx):
         # send help embed
+        # TODO:Help commands
         await ctx.send("this helps yeah?")
 
 def setup(bot):

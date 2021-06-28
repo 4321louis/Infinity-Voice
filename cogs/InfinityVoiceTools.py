@@ -40,34 +40,34 @@ class InfinityVoiceTools(commands.Cog):
 
         if (before.channel != None):
             # looping through infinityvoices in server
-            (await get_infinity_voice(self, before.channel)).update_channels()
+            (await get_infinity_voice(self, before.channel)).on_size_change()
             
             # for infinityvoice in self.infinityVoices[before.channel.guild_id]:
             #     for active_channel in infinityvoice.active_channels:
             #         if before.channel == active_channel:
-            #             await infinityvoice.update_channels()
+            #             await infinityvoice.on_size_change()
 
         if (after.channel != None):
             # looping through infinityvoices in server
 
-            (await get_infinity_voice(self, after.channel)).update_channels()
+            (await get_infinity_voice(self, after.channel)).on_size_change()
             # for infinityvoice in self.infinityVoices[before.channel.guild_id]:
             #     for active_channel in infinityvoice.active_channels:
             #         if before.channel == active_channel:
-            #             await infinityvoice.update_channels()
+            #             await infinityvoice.on_size_change()
 
 
 
-            # await InfinityVoice.get_infinity_voice(before.channel).update_channels()
+            # await InfinityVoice.get_infinity_voice(before.channel).on_size_change()
         
-            # await InfinityVoice.get_infinity_voice(after.channel).update_channels()
+            # await InfinityVoice.get_infinity_voice(after.channel).on_size_change()
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
     #TODO:fix this if statements logic
     #when an infinity voice channel is edited (but not by the bot) updates the references for channels in that infinity voice
         if before.name == after.name:
-            await InfinityVoice.get_infinity_voice(before).reload()
+            await InfinityVoice.get_infinity_voice(before).reload_references()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -91,7 +91,7 @@ class InfinityVoiceTools(commands.Cog):
             else:
                 (await self.infinityVoices)[ctx.guild.id] = [new]
             print("created an infinity voice")
-            await new.update_channels()
+            await new.on_size_change()
 
     @commands.command()
     async def edit(self, ctx, number = "0"):
