@@ -1,3 +1,5 @@
+#TODO:move this to a main file
+
 import discord
 import os
 from discord.ext import commands

@@ -12,6 +12,8 @@ class InfinityVoice:
         self.guild = guild
         # current voice channels in infinityvoice
         self.active_channels = []
+        # controls the state of the voice
+        self.inEditMode = false
 
         # where shit is actually stored
         default = ChannelOverride()
@@ -23,7 +25,10 @@ class InfinityVoice:
         # overrides is a dictionary containing a number then the channel
         # lambda ensures all future keys get auto assigned default as their value
         self.overrides = defaultdict(lambda:default)#[int,ChannelOverride]
-    
+
+    async def on_voice_state_update(member:Member, before, after):
+        await self.on_size_change()
+        
     # called to update the infinity voice 
     async def on_size_change(self):
         # delete excess channels
@@ -65,17 +70,3 @@ class InfinityVoice:
         for i in range(len(self.active_channels)):
             infinity_voice.active_channels[i] = await bot.fetch_channel(self.active_channels[i].id)    
         print_timed("Reload Finished " + self.name_format)
-
-# guild id to infinity voice
-#TODO:is this even type hinting?
-# infinityVoices = dict()#[int,InfinityVoice]
-
-
-
-def save_infinities():
-    # save as dict{guild.id: [infinityvoices]}
-    f = open("InfinityVoiceSaves.txt","w+")
-    dump=json.dumps(infinityVoices,default=json_encoder)
-    print_timed("Saving:"+ dump)
-    f.write(dump)
-    f.close()
