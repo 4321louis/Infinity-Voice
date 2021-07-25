@@ -1,4 +1,4 @@
-from utils import print_timed,ChannelOverride
+from utils import print_timed,ChannelSettings
 import json
 from typing import Dict
 from functools import reduce
@@ -15,16 +15,16 @@ class InfinityVoice:
         # controls the state of the voice
         self.inEditMode = false
 
-        # where shit is actually stored
-        default = ChannelSettings()
         # name format of voice channels
-        default.name_format = name_format
+        name_format
         # max users of voice channels
-        default.user_limit = user_limit
+        user_limit
+        # where shit is actually stored
+        default = ChannelSettings(name_format = name_format,user_limit = user_limit)
 
-        # overrides is a dictionary containing a number then the channel
+        # settings is a dictionary containing a number then the channel
         # lambda ensures all future keys get auto assigned default as their value
-        self.overrides = defaultdict(lambda:default)#[int,ChannelOverride]
+        self.settings = defaultdict(lambda:default)#[int,ChannelSettings]
 
     async def on_voice_state_update(member:Member, before, after):
         await self.on_size_change()
@@ -50,18 +50,18 @@ class InfinityVoice:
             self.active_channels.append(await self.guild.create_voice_channel(
                 # locates the most recent channel and changes the name format to be the same but with number incremented
                 # name_format needs to be channelName {number}
-                name = self.overrides[number].name_format.format(number + 1),
+                name = self.settings[number].name_format.format(number + 1),
                 # gets user_limit and overwrites from the last channel
-                user_limit = self.overrides[number].user_limit,
-                overwrites = self.overrides[number].overwrites,
-                category   = self.overrides[None].category,
+                user_limit = self.settings[number].user_limit,
+                overwrites = self.settings[number].overwrites,
+                category   = self.settings[None].category,
                 # puts new channel below
-                position   = self.overrides[None].position + len(self.active_channels) - 1))
+                position   = self.settings[None].position + len(self.active_channels) - 1))
     
         # rename channels
         for i in range(len(self.active_channels)):
-            if self.overrides[i].name_format.format(i+1) != self.active_channels[i].name:
-                await self.active_channels[i].edit(name =  self.overrides[i].name_format.format(i+1))
+            if self.settings[i].name_format.format(i+1) != self.active_channels[i].name:
+                await self.active_channels[i].edit(name =  self.settings[i].name_format.format(i+1))
 
 
     # updates the references for the channels in the infinity voice 'infinity_voice'

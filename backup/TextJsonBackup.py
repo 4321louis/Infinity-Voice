@@ -1,4 +1,5 @@
 import json
+from ChannelSettings import ChannelSettings
 
 class TextJsonBackup(GeneralBackup):
     SAVE_LOCATION = "../data/InfinityVoiceSaves.txt"
@@ -21,8 +22,8 @@ class TextJsonBackup(GeneralBackup):
         # encode guilds and voice channels as their id
         if isinstance(obj,Guild) or isinstance(obj,VoiceChannel):
             return obj.id
-        # encode InfinityVoice or ChannelOverride's symbol table
-        if isinstance(obj,InfinityVoice) or isinstance(obj,ChannelOverride):
+        # encode InfinityVoice or ChannelSettings's symbol table
+        if isinstance(obj,InfinityVoice) or isinstance(obj,ChannelSettings):
             return obj.__dict__
     
     def json_decoder(self,str:str) -> dict:
@@ -37,23 +38,22 @@ class TextJsonBackup(GeneralBackup):
                     final[guild_id][-1].active_channels.append(bot.get_channel(channel_id))
                 default_dict = infinity_voice_dict["overrides"]["null"]
                 # TODO:kwargs please probs
-                default = ChannelSettings()
-                default.name_format = default_dict["name_format"]
-                default.limit = default_dict["limit"]
-                default.overwrites = default_dict["overwrites"]
-                default.category = bot.fetch_channel(default_dict["category"])
-                default.position = default_dict["position"]
+                default = ChannelSettings(name_format = default_dict["name_format"]
+                    ,limit = default_dict["limit"]
+                    ,overwrites = default_dict["overwrites"]
+                    ,category = bot.fetch_channel(default_dict["category"])
+                    ,position = default_dict["position"])
                 final[guild_id][-1].overrides = defaultdict(default)
                 for number in infinity_voice_dict["overrides"]:
-                    if number == "null":continue
+                    if number == "null": continue
                     override_dict = infinity_voice_dict["overrides"][number]
                     # TODO:kwargs please probs
-                    override = ChannelSettings()
-                    override.name_format = override_dict["name_format"]
-                    override.limit = override_dict["limit"]
-                    override.overwrites = override_dict["overwrites"]
-                    # TODO: bot singleton
-                    override.category = bot.fetch_channel(override_dict["category"])
-                    override.position = override_dict["position"]
+                    override = ChannelSettings(
+                        ,name_format = override_dict["name_format"]
+                        ,limit = override_dict["limit"]
+                        ,overwrites = override_dict["overwrites"]
+                        # TODO: bot singleton
+                        ,category = bot.fetch_channel(override_dict["category"])
+                        ,position = override_dict["position"])
                     final[guild_id][-1].overrides[int(number)] = override
         return final

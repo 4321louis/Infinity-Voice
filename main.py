@@ -12,7 +12,7 @@ import InfinityVoice as IV
 
 
 #TODO:pass xd
-def voice_channel_to_channel_override(channel:VoiceChannel) -> utils.ChannelOverride:
+def voice_channel_to_channel_override(channel:VoiceChannel) -> utils.ChannelSettings:
     pass
 
 #create bot instance
@@ -79,6 +79,8 @@ async def create(ctx,name_format,user_limit = 0):
         IV.infinityVoices[ctx.guild.id].append(new)
         await new.on_size_change()
 
+# TODO:Change this command to edit an entire IV only not specific channels
+#  +add show and hide commands for editing specfic channels
 @bot.command()
 async def edit(ctx, number = "0"):
     iv = get_infinity_voice(ctx.author.voice.channel)
@@ -89,7 +91,7 @@ async def edit(ctx, number = "0"):
         await ctx.send(iv.overrides.toString())
     elif number.isnumeric():
         if not (int(number) in iv.overrides or number == "0"):
-            iv.overrides[int(number)] = utils.ChannelOverride()
+            iv.overrides[int(number)] = utils.ChannelSettings()
         iv.overrides[int(number)].editing = True
 
 @bot.command()
@@ -129,13 +131,7 @@ async def saveall(ctx):
         backup.saveAll(IV.infinityVoices)
 
 
-# Returns the infinityvoice the given channel is in
-def get_infinity_voice(self,channel: VoiceChannel) -> Union[InfinityVoice, None]:
-    for infinity_voice in infinityVoices[channel.guild.id]:
-        for active_channel in infinity_voice.active_channels:
-            if channel == active_channel:
-                return infinity_voice
-    return None
+
         
 
 f = open("token.txt","r")

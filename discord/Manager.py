@@ -4,6 +4,7 @@ from InfinityVoice import InfinityVoice,get_infinity_voice
 
 from datetime import datetime
 from collections import defaultdict
+from Utils import timestamp
 
 from backup.TextJsonBackup import TextJsonBackup
 
@@ -13,6 +14,10 @@ class Manager(commands.Cog):
         # Hashmap has guildId as key and list of InfinityVoices as value
         self.guildMap = defaultdict(list)
 
+    #######################################
+    ###############LISTENERS###############
+    #######################################
+    
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         timestamp("Bot launched")
@@ -28,6 +33,27 @@ class Manager(commands.Cog):
         timestamp("Bot shut off")
         TextJsonBackup.saveAll(self.guildMap)
         timestamp("Saving: " + self.guildMap)
+
+
+    @commands.Cog.listener()
+    async def on_guild_channel_update(self, before, after):
+    #TODO:fix this if statements logic
+    #when an infinity voice channel is edited (but not by the bot) updates the references for channels in that infinity voice
+        if before.name == after.name:
+            await InfinityVoice.get_infinity_voice(before).reload_references()
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        self.infinityVoices[guild.id] = []
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        self.infinityVoices.pop(guild.id)
+
+
+    ######################################
+    ###############COMMANDS###############
+    ######################################
 
     # Create a new infinityVoice
     @commands.command()
@@ -55,7 +81,7 @@ class Manager(commands.Cog):
             if not (int(number) in iv.overrides or number == "0"):
                 print("Not implemented")
                 #TODO sort out default channel override
-                # iv.overrides[int(number)] = utils.ChannelOverride()
+                # iv.overrides[int(number)] = utils.ChannelSettings()
             iv.overrides[int(number)].editing = True
 
     # Save infinityVoice   
@@ -77,10 +103,14 @@ class Manager(commands.Cog):
                     ctx.send("Saved channel " + str(number))
             else:
                 ctx.send("That channel is not currently being edited")
+
+    # Returns the infinityvoice the given channel is in
+    def get_infinity_voice(self,channel: VoiceChannel) -> Union[InfinityVoice, None]:
+        for infinity_voice in infinityVoices[channel.guild.id]:
+            for active_channel in infinity_voice.active_channels:
+                if channel == active_channel:
+                    return infinity_voice
+        return None
         
-
-def timestamp(message: str) -> None:
-    print("[" + str(datetime.now()) + "]", message)
-
-def setup(bot):
-    bot.add_cog(Manager(bot))
+    def setup(bot):
+        bot.add_cog(Manager(bot))
