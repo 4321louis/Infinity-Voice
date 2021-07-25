@@ -16,7 +16,7 @@ class InfinityVoice:
         self.inEditMode = false
 
         # where shit is actually stored
-        default = ChannelOverride()
+        default = ChannelSettings()
         # name format of voice channels
         default.name_format = name_format
         # max users of voice channels
