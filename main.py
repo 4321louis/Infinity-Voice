@@ -129,6 +129,15 @@ async def saveall(ctx):
         backup.saveAll(IV.infinityVoices)
 
 
+# Returns the infinityvoice the given channel is in
+def get_infinity_voice(self,channel: VoiceChannel) -> Union[InfinityVoice, None]:
+    for infinity_voice in infinityVoices[channel.guild.id]:
+        for active_channel in infinity_voice.active_channels:
+            if channel == active_channel:
+                return infinity_voice
+    return None
+        
+
 f = open("token.txt","r")
 bot.run(f.read())
 backup.saveAll(IV.infinityVoices)

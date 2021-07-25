@@ -57,12 +57,3 @@ class TextJsonBackup(GeneralBackup):
                     override.position = override_dict["position"]
                     final[guild_id][-1].overrides[int(number)] = override
         return final
-
-    # Returns the infinityvoice the given channel is in
-    def get_infinity_voice(self,channel: VoiceChannel) -> Union[InfinityVoice, None]:
-        for infinity_voice in infinityVoices[channel.guild.id]:
-            for active_channel in infinity_voice.active_channels:
-                if channel == active_channel:
-                    return infinity_voice
-        return None
-        
