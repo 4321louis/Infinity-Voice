@@ -18,6 +18,8 @@ class Manager(commands.Cog):
     ###############LISTENERS###############
     #######################################
     
+    ####Static####
+
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         timestamp("Bot launched")
@@ -26,11 +28,10 @@ class Manager(commands.Cog):
         print("------")
         self.guildMap = TextJsonBackup.loadAll()
         print(self.guildMap)
-        
 
     @commands.Cog.listener()
     async def on_disconnect(self) -> None:
-        timestamp("Bot shut off")
+        timestamp("Bot disconnected")
         TextJsonBackup.saveAll(self.guildMap)
         timestamp("Saving: " + self.guildMap)
 
@@ -50,10 +51,31 @@ class Manager(commands.Cog):
     async def on_guild_remove(self, guild):
         self.infinityVoices.pop(guild.id)
 
+    ####IV specific####
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(member:Member, before, after):
+        #update the infinity voice that was affected
+        if (before.channel != None):
+            await get_infinity_voice(before.channel).on_voice_state_update(member, before, after)
+        if (after.channel != None):
+            await get_infinity_voice(after.channel).on_voice_state_update(member, before, after)
+
+
 
     ######################################
     ###############COMMANDS###############
     ######################################
+
+    ####static####
+
+    #TODO:HELP? look into the help command in the library
+    # @bot.command()
+    # async def help(ctx,command)
+    #     pass
+
+    #TODO:think about what name_format is for the end user
+    ##i.e. "Gaming {}" where {} is the number? how about special chars instead? which?
 
     # Create a new infinityVoice
     @commands.command()
@@ -66,27 +88,46 @@ class Manager(commands.Cog):
             print("User limit:", user_limit)
             new = InfinityVoice(ctx.guild,name_format,int(user_limit))
             print("created an infinity voice")
+            self.guildMap[ctx.guild.id].append(new)
             await new.on_size_change()
+
+    ####IV specific####
+
+
+    # TODO:Change this command to edit an entire IV only not specific channels
+    # + add show and hide commands for editing specfic channels
 
     # Edit infinityVoice
     @commands.command()
-    async def edit(self, ctx, number: str = "0") -> None:
+    async def edit(self, ctx) -> None:
+        # FIXME:get_infinity_voice location
         iv = InfinityVoice.get_infinity_voice(ctx.author.voice.channel)
         if iv == None: 
             ctx.send("Please join an Infinity Voice")
             return
+        else:
+            iv.edit()
+        # FIXME:remove this \/
         if number == "list":
             await ctx.send(iv.overrides.toString())
         elif number.isnumeric():
             if not (int(number) in iv.overrides or number == "0"):
                 print("Not implemented")
                 #TODO sort out default channel override
-                # iv.overrides[int(number)] = utils.ChannelSettings()
+                iv.overrides[int(number)] = ChannelSettings()
             iv.overrides[int(number)].editing = True
 
     # Save infinityVoice   
     @commands.command()
-    async def save(self, ctx, number: str = "0") -> None:
+    async def save(self, ctx) -> None:
+        # FIXME:get_infinity_voice location
+        iv = InfinityVoice.get_infinity_voice(ctx.author.voice.channel)
+        if iv == None: 
+            ctx.send("Please join an Infinity Voice")
+            return
+        else:
+            iv.save()
+        # FIXME: remove the rest of this
         iv = InfinityVoice.get_infinity_voice(ctx.author.voice.channel)
         if iv == None: 
             ctx.send("Please join an Infinity Voice")
@@ -104,6 +145,30 @@ class Manager(commands.Cog):
             else:
                 ctx.send("That channel is not currently being edited")
 
+    ####Temporary/Debug####
+    @commands.command()
+    #4321louis' panic button
+    async def bleh(ctx):
+        if ctx.message.author.id == 184599719060832257:
+            IV.infinityVoices = {}
+
+    @commands.command()
+    #4321louis' other panic button
+    async def saveall(ctx):
+        if ctx.message.author.id == 184599719060832257:
+            backup.saveAll(IV.infinityVoices)
+
+    # @bot.command()
+    # async def load(ctx, extension):
+    #     bot.load_extension(f"cogs.{extension}")
+
+    # @bot.command()
+    # async def unload(ctx, extension):
+    #     bot.unload_extension(f"cogs.{extension}")
+
+ 
+    ################################
+    
     # Returns the infinityvoice the given channel is in
     def get_infinity_voice(self,channel: VoiceChannel) -> Union[InfinityVoice, None]:
         for infinity_voice in infinityVoices[channel.guild.id]:
@@ -112,5 +177,5 @@ class Manager(commands.Cog):
                     return infinity_voice
         return None
         
-    def setup(bot):
+    def setup(self,bot):
         bot.add_cog(Manager(bot))
