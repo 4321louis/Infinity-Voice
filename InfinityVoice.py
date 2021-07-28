@@ -14,6 +14,10 @@ class InfinityVoice:
         self.active_channels = []
         # controls the state of the voice
         self.inEditMode = false
+        #position in the server
+        self.position = 1
+        #category of the voice channel
+        self.category = None  
 
         # name format of voice channels
         name_format
@@ -26,8 +30,9 @@ class InfinityVoice:
         # lambda ensures all future keys get auto assigned default as their value
         self.settings = defaultdict(lambda:default)#[int,ChannelSettings]
 
-    async def on_voice_state_update(member:Member, before, after):
-        await self.on_size_change()
+    async def on_voice_state_update(self,member:Member, before, after):
+        if not self.inEditMode:
+            await self.on_size_change()
         
     # called to update the infinity voice 
     async def on_size_change(self):
