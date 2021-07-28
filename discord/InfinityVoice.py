@@ -1,4 +1,5 @@
-from utils import print_timed,ChannelSettings
+from utils.Utils import print_timed
+from ChannelSettings import ChannelSettings
 import json
 from typing import Dict
 from functools import reduce
