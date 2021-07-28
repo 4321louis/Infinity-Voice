@@ -38,7 +38,7 @@ class Manager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
-    #TODO:fix this if statements logic
+    #FIXME:fix this if statements logic
     #when an infinity voice channel is edited (but not by the bot) updates the references for channels in that infinity voice
         if before.name == after.name:
             await InfinityVoice.get_infinity_voice(before).reload_references()
@@ -168,7 +168,7 @@ class Manager(commands.Cog):
 
  
     ################################
-    
+
     # Returns the infinityvoice the given channel is in
     def get_infinity_voice(self,channel: VoiceChannel) -> Union[InfinityVoice, None]:
         for infinity_voice in infinityVoices[channel.guild.id]:

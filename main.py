@@ -12,7 +12,6 @@ cog_modules = [
 
 command_prefix = "v!"
 
-
 ####intialisation####
 
 #create bot instance

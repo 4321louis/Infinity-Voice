@@ -1,3 +1,4 @@
+# FIXME: this should be moved into manager for now as its just printing a string
 import discord
 from discord.ext import commands
 
